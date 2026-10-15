@@ -1,0 +1,37 @@
+{
+  "name": "my-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "fungi-app dev",
+    "build": "fungi-app build"
+  },
+  "fungi": {
+    "app": {
+      "displayName": "My App",
+      "capabilities": [],
+      "handlers": [],
+      "roles": []
+    },
+    "backendDefinition": "src/backend/methods.ts"
+  },
+  "dependencies": {
+    "@fungi.computer/agar": "0.0.0",
+    "@fungi.computer/caps": "0.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "create-fungi-app": "0.0.0",
+    "@fungi.computer/oyster": "0.0.0",
+    "typescript": "5.9.3",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@cloudflare/workers-types": "5.20260828.1",
+    "wrangler": "4.127.1",
+    "vite": "8.2.2",
+    "@vitejs/plugin-react": "6.1.1"
+  }
+}

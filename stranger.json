@@ -1,0 +1,85 @@
+{
+  "expectedTarballFiles": [
+    "package/LICENSE",
+    "package/README.md",
+    "package/dist/app-cli.d.ts",
+    "package/dist/app-cli.js",
+    "package/dist/cli.d.ts",
+    "package/dist/cli.js",
+    "package/dist/ids.d.ts",
+    "package/dist/ids.js",
+    "package/dist/index.d.ts",
+    "package/dist/index.js",
+    "package/docs/api/README.md",
+    "package/package.json",
+    "package/template/README.md",
+    "package/template/gitignore",
+    "package/template/index.html",
+    "package/template/oyster/worker.ts",
+    "package/template/oyster/wrangler.json",
+    "package/template/package.json",
+    "package/template/src/App.tsx",
+    "package/template/src/backend/index.ts",
+    "package/template/src/backend/methods.ts",
+    "package/template/src/main.tsx",
+    "package/template/tsconfig.backend.json",
+    "package/template/tsconfig.json"
+  ],
+  "localDependencies": ["../cairn", "../lantern", "../oyster", "../puffball"],
+  "runtimeFixture": "test/stranger/runtime.mjs",
+  "typecheckFixture": "test/stranger/consumer.mts",
+  "docs": {
+    "sigil": "run",
+    "home": {
+      "lead": "Create an App with Caps UI and a typed Agar backend method, then run it locally in a standalone Oyster.",
+      "example": {
+        "file": "home.ts",
+        "title": "Create an App",
+        "caption": "npm create fungi-app@latest my-app runs this scaffold step and offers to install dependencies. Then cd my-app and run npm run dev."
+      },
+      "ladder": {
+        "start": [
+          {
+            "title": "Quickstart",
+            "href": "/quickstart/",
+            "description": "Create your App, open the local URL and call its greet method."
+          },
+          {
+            "title": "Core concepts",
+            "href": "/concepts/",
+            "description": "How the UI, backend declaration, standalone Worker and Release fit together."
+          }
+        ],
+        "tasks": [
+          {
+            "title": "Build a Release",
+            "href": "/examples/",
+            "description": "Build saved files into dist/release.json and dist/artifacts/."
+          },
+          {
+            "title": "Run your own Apps",
+            "href": "https://docs.fungi.computer/reference/packages/#oyster",
+            "description": "Use Oyster to host Apps."
+          },
+          {
+            "title": "Write an App",
+            "href": "https://docs.fungi.computer/reference/packages/#agar",
+            "description": "Use Agar to declare typed App methods and capabilities."
+          }
+        ],
+        "reference": [
+          {
+            "title": "API reference",
+            "href": "/api/",
+            "description": "The scaffoldApp and projectName exports."
+          },
+          {
+            "title": "License and status",
+            "href": "/status/",
+            "description": "Package metadata and MIT license."
+          }
+        ]
+      }
+    }
+  }
+}

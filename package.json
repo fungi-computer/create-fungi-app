@@ -1,0 +1,80 @@
+{
+  "name": "create-fungi-app",
+  "version": "0.0.0",
+  "description": "Create a Caps and Agar App that runs on a standalone Oyster",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.20.0"
+  },
+  "bin": {
+    "create-fungi-app": "dist/cli.js",
+    "fungi-app": "dist/app-cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "template",
+    "docs/api",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src test scripts --max-warnings=0 && ../../node_modules/.bin/oxlint --config ../../oxlint.config.ts --deny-warnings src test scripts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/scaffold.test.mjs",
+    "docs": "tsx ../../tooling/repository/src/docs/cli.ts check --root ../..",
+    "docs:write": "tsx ../../tooling/repository/src/docs/cli.ts write --root ../..",
+    "pack": "mkdir -p ../../.botanical/create-fungi-app-pack && pnpm pack --pack-destination ../../.botanical/create-fungi-app-pack",
+    "smoke": "node dist/cli.js --help",
+    "stranger": "tsx ../../tooling/repository/src/artifacts/cli.ts --repo-root ../.. .",
+    "format:check": "node ../../tooling/repository/scripts/format-package-check.mjs",
+    "lint:anti-slop": "node ../../tooling/repository/scripts/lint-package-anti-slop.mjs",
+    "proof:clean": "node test/pack-closure.mjs && node test/clean-home.native.mjs ../../.botanical/create-fungi-app/archives",
+    "prepack": "node scripts/prepare-package.mjs"
+  },
+  "dependencies": {
+    "@fungi.computer/lantern": "workspace:*",
+    "zod": "4.4.3",
+    "@fungi.computer/oyster": "workspace:*",
+    "@fungi.computer/puffball": "workspace:*",
+    "effect": "4.0.2",
+    "validate-npm-package-name": "7.0.2",
+    "@fungi.computer/cairn": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3",
+    "tsx": "4.23.12",
+    "playwright": "1.62.1",
+    "@types/validate-npm-package-name": "4.0.2"
+  },
+  "botanical": {
+    "role": "package",
+    "operations": {
+      "lint": "required",
+      "typecheck": "required",
+      "build": "required",
+      "test": "required",
+      "docs": "required",
+      "pack": "required",
+      "smoke": "required",
+      "stranger": "required"
+    }
+  },
+  "publishConfig": {
+    "directory": ".botanical/package",
+    "linkDirectory": false,
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fungi-computer/create-fungi-app.git"
+  }
+}
