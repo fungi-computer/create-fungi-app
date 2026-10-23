@@ -4,5 +4,6 @@ export {
   OysterBinding,
   OysterInstance,
   OysterRegistry,
+  OysterInstallationExecutor,
 } from "@fungi.computer/oyster/workers";
 export default createOysterWorker();

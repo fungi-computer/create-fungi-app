@@ -7,7 +7,7 @@ import "@fungi.computer/caps/fonts.css";
 const root = document.getElementById("app");
 if (root === null) throw new Error("App mount is missing.");
 const session = await connectApp({
-  expectedHostOrigin: new URL(document.referrer).origin,
+  host: "parent",
 });
 window.addEventListener("pagehide", () => session.dispose(), { once: true });
 createRoot(root).render(<App session={session} />);

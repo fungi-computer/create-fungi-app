@@ -27,7 +27,11 @@
   ],
   "localDependencies": ["../cairn", "../lantern", "../oyster", "../puffball"],
   "runtimeFixture": "test/stranger/runtime.mjs",
-  "typecheckFixture": "test/stranger/consumer.mts",
+  "typechecks": [
+    {
+      "fixture": "test/stranger/consumer.mts"
+    }
+  ],
   "docs": {
     "sigil": "run",
     "home": {
@@ -58,12 +62,12 @@
           },
           {
             "title": "Run your own Apps",
-            "href": "https://docs.fungi.computer/reference/packages/#oyster",
+            "href": "https://docs.fungi.computer/oyster/",
             "description": "Use Oyster to host Apps."
           },
           {
             "title": "Write an App",
-            "href": "https://docs.fungi.computer/reference/packages/#agar",
+            "href": "https://docs.fungi.computer/agar/",
             "description": "Use Agar to declare typed App methods and capabilities."
           }
         ],

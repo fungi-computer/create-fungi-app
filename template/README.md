@@ -32,18 +32,49 @@ it does not modify your repository or create a customer commit. The Release's
 provenance names that exact snapshot. Dependency installation uses
 `package-lock.json`.
 
-To install the Release into an Oyster, use its public packing client:
+To install the Release into an existing Oyster, set its URL and owner key, then
+use the ordinary Oyster CLI:
 
-```js
-import { installRelease } from "@fungi.computer/oyster/pack";
-
-const response = await installRelease({
-  directory: "./dist",
-  url: process.env.OYSTER_URL,
-  key: process.env.OYSTER_OWNER_KEY,
-});
-if (!response.ok) throw new Error(`Installation refused: ${response.status}`);
+```sh
+export OYSTER_URL=https://your-oyster.example
+export OYSTER_OWNER_KEY='<your owner key>'
+npx oyster install ./dist --installation-id my-app
+# The manifest path is also accepted:
+npx oyster install ./dist/release.json --installation-id my-app
 ```
+
+Both forms use `installRelease` from `@fungi.computer/oyster/pack`: artifacts
+upload before the installation request. A failed upload or installation exits
+nonzero; the command does not provision or deploy an Oyster.
+
+For repository-driven authoring, commit the App's root `package.json` and its
+`fungi.build` recipe on main, push to a repository in Bonsai, then open its
+Settings and choose **Make this an App**. Registration reads committed metadata,
+not dirty working files, and does not build or install. Later accepted main
+pushes build that exact commit on an attached hosted backend. Successful builds
+may reuse existing approval; new permissions produce `needs_consent` and leave
+any previous Release running. Local-only Computers return `no_backend`.
 
 The same Release format is used by Fungi. Building creates the Release locally;
 it does not install or publish it.
+
+## Models and mascots
+
+When adding Quaternius art, add `@fungi.computer/art-library` and `three` as
+dependencies. Discover models through `@fungi.computer/art-library/models`: use
+`models` and `searchModels(models, query)` to find candidates, then
+`requireModel(models, id)` to pin a catalog ID rather than guessing filenames.
+
+Load the selected asset with `modelLoader()` from
+`@fungi.computer/art-library/three` and its `loadAsync(modelUrl)` method. This
+loader wires the Meshopt decoder needed by compressed models; a bare
+`GLTFLoader` does not.
+
+Include the chosen model (and any referenced buffers/textures) in the Release's
+built assets and use the emitted asset URL; the catalog row's `file` is not a
+public Oyster URL. Keep `fungi.build.assetBase` as `"./"` and URLs
+release-scoped under `/ui/<installation>/<release>/`. Resolve emitted relative
+paths against the App document base, for example
+`new URL("./assets/mascot.glb", document.baseURI).href` if that is the emitted
+path. Never hard-code `/models/...`: its leading slash escapes the Release
+prefix and requests an asset from the host root.

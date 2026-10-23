@@ -10,14 +10,18 @@ import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { Cli } from "@fungi.computer/lantern";
 import {
-  bundledHtmlRecipe,
+  readBuildManifest,
+  appBuildRecipe,
   createAppPublisher,
   createLocalArtifactWriter,
   createLocalBuildExecutor,
   createLocalDirectorySourceCapture,
 } from "@fungi.computer/oyster/build";
-import { installRelease } from "@fungi.computer/oyster/pack";
-import { parseAppId, parseReleaseId } from "@fungi.computer/puffball";
+import {
+  InstallationObservationError,
+  installRelease,
+} from "@fungi.computer/oyster/pack";
+import { parseReleaseId } from "@fungi.computer/puffball";
 import { releaseSchema } from "@fungi.computer/puffball/effect";
 import * as Effect from "effect/Effect";
 import * as Redacted from "effect/Redacted";
@@ -37,33 +41,22 @@ process.once("SIGTERM", () => {
   shutdown.interrupted = true;
   lifecycle.abort();
 });
-const manifestSchema = z.object({ fungi: z.object({ appId: z.string() }) });
 
 async function build(out: string) {
-  const manifest = manifestSchema.parse(
-    JSON.parse(await readFile(join(root, "package.json"), "utf8")),
+  const manifest = readBuildManifest(
+    await readFile(join(root, "package.json"), "utf8"),
   );
-  const assets = bundledHtmlRecipe.limits;
+  const appId = manifest.fungi.appId;
+  if (appId === undefined) throw new Error("App manifest requires fungi.appId");
+  const recipe = appBuildRecipe(manifest, "");
   const publisher = createAppPublisher({
-    config: {
-      appId: parseAppId(manifest.fungi.appId),
-      recipe: {
-        kind: "source-html",
-        entry: "index.html",
-        assetBase: "./",
-        assets,
-        maxOutputBytes: assets.maxTotalBytes,
-        backend: {
-          entry: "src/backend/index.ts",
-          exportName: "MyApp",
-          compatibilityDate: "2026-09-04",
-          runtime: { kind: "durable-facet", stateSchema: 1 },
-        },
-      },
-    },
+    config: { appId, recipe },
     sourceCapture: createLocalDirectorySourceCapture(root),
     buildExecutor: createLocalBuildExecutor(),
-    artifactWriter: createLocalArtifactWriter(join(out, "artifacts"), assets),
+    artifactWriter: createLocalArtifactWriter(
+      join(out, "artifacts"),
+      recipe.assets,
+    ),
     releaseCatalog: { createRelease: (release) => Promise.resolve(release) },
   });
   const release = await Effect.runPromise(
@@ -108,7 +101,7 @@ async function dev(port: number) {
   const worker = (
     release: string,
   ) => `import worker from "../../oyster/worker.ts";
-export { OysterBinding, OysterRegistry, OysterInstance } from "../../oyster/worker.ts";
+export { OysterBinding, OysterRegistry, OysterInstance, OysterInstallationExecutor } from "../../oyster/worker.ts";
 export default { async fetch(request, env, context) {
   const headers = new Headers(request.headers);
   headers.set("Authorization", "Bearer " + env.OYSTER_OWNER_KEY);
@@ -168,33 +161,20 @@ export default { async fetch(request, env, context) {
       process.kill(-child.pid, "SIGTERM");
   };
   lifecycle.signal.addEventListener("abort", stop, { once: true });
-  async function install(encoded: string) {
+  async function install() {
     const response = await installRelease({
       directory: out,
       url: origin,
       key,
       installationId: "app",
-    });
-    if (response.status === 409) {
-      const refusal = z
-        .object({ error: z.string() })
-        .safeParse(await response.json());
-      if (!refusal.success || refusal.data.error !== "installation_exists")
-        throw new Error("Oyster refused the App installation.");
-      const updated = await fetch(`${origin}/api/installations/app/release`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-        },
-        body: encoded,
-        signal: lifecycle.signal,
-      });
-      if (!updated.ok)
-        throw new Error(
-          `Oyster refused the App update (${String(updated.status)}).`,
+      signal: lifecycle.signal,
+      onAdmitted: ({ installationId, requestId }) => {
+        cli.info(
+          `Installation ${installationId} accepted (request ${requestId}); observing authoritative status.`,
         );
-    } else if (!response.ok)
+      },
+    });
+    if (!response.ok)
       throw new Error(
         `Oyster refused the App installation (${String(response.status)}).`,
       );
@@ -210,7 +190,7 @@ export default { async fetch(request, env, context) {
       while (pending && !lifecycle.signal.aborted) {
         pending = false;
         release = await cli.task("Rebuilding App", () => build(out));
-        await install(release);
+        await install();
         await writeFile(join(directory, "dev-worker.ts"), worker(release));
         cli.info("App rebuilt; Wrangler is reloading the page.");
       }
@@ -219,7 +199,9 @@ export default { async fetch(request, env, context) {
         Effect.runSync(
           Effect.logError("App rebuild failed.", Redacted.make(cause)),
         );
-        cli.info("App rebuild failed. Fix the source and save again.");
+        if (cause instanceof InstallationObservationError)
+          reportUnconfirmedInstallation(cause);
+        else cli.info("App rebuild failed. Fix the source and save again.");
       }
     } finally {
       rebuilding = false;
@@ -255,7 +237,7 @@ export default { async fetch(request, env, context) {
         });
       await delay(500, undefined, { signal: lifecycle.signal });
     }
-    await install(release);
+    await install();
     watch(
       join(root, "src"),
       { recursive: true, signal: lifecycle.signal },
@@ -278,6 +260,12 @@ export default { async fetch(request, env, context) {
   }
 }
 
+function reportUnconfirmedInstallation(cause: InstallationObservationError) {
+  cli.info(
+    `Installation outcome unconfirmed (request ${cause.requestId}). Oyster may still finish; stopping observation does not cancel it.`,
+  );
+}
+
 try {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
@@ -297,6 +285,8 @@ try {
   else throw new Error("Choose fungi-app build or fungi-app dev.");
 } catch (cause) {
   if (!shutdown.interrupted) {
+    if (cause instanceof InstallationObservationError)
+      reportUnconfirmedInstallation(cause);
     Effect.runSync(
       Effect.logError("App command failed.", Redacted.make(cause)),
     );

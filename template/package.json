@@ -14,7 +14,28 @@
       "handlers": [],
       "roles": []
     },
-    "backendDefinition": "src/backend/methods.ts"
+    "backendDefinition": "src/backend/methods.ts",
+    "build": {
+      "kind": "source-html",
+      "entry": "index.html",
+      "assetBase": "./",
+      "assets": {
+        "maxManifestBytes": 1048576,
+        "maxObjects": 1024,
+        "maxObjectBytes": 16777216,
+        "maxTotalBytes": 67108864
+      },
+      "maxOutputBytes": 67108864,
+      "backend": {
+        "entry": "src/backend/index.ts",
+        "exportName": "MyApp",
+        "compatibilityDate": "2026-09-04",
+        "runtime": {
+          "kind": "durable-facet",
+          "stateSchema": 1
+        }
+      }
+    }
   },
   "dependencies": {
     "@fungi.computer/agar": "0.0.0",
