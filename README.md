@@ -7,6 +7,14 @@ method, running in a local standalone Oyster. Most people want
 
 ## Quick start
 
+> **Not yet published on npm.** This starter has been tested with locally packed
+> candidate packages. `npm create fungi-app@latest` is not available from the
+> public npm registry yet. The commands below describe the intended published
+> workflow, not a setup you can run from npm today.
+
+Build and test an App locally without Docker, a Fungi Computer, or a Cloudflare
+account.
+
 Use Node 24.20.0, npm 11.19.0 and Git for Oyster's pinned build toolchain.
 
 ```sh
@@ -22,9 +30,73 @@ Existing directories are refused.
 Open the loopback URL printed by the development command. Click **Say hello** to
 call the backend. Save an edit in `src/` to rebuild the App and reload its page.
 
+You can also test the typed backend over HTTP while development is running:
+
+```sh
+curl --fail-with-body http://127.0.0.1:61343/apps/app/methods/greet \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Oyster"}'
+# {"message":"Hello, Oyster!"}
+```
+
+Stop development with Ctrl+C. To build a Release without starting a server:
+
+```sh
+npm run build
+```
+
+This writes `dist/release.json` and `dist/artifacts/`; it does not deploy or
+publish anything.
+
+### What runs locally
+
+- `npm run dev` uses the existing Oyster builder, then runs
+  `wrangler dev --local` on loopback. Workerd executes the host Worker and the
+  App's Durable Object backend through Worker Loader. Local R2 serves the built
+  UI and assets; Wrangler keeps local state under `.wrangler/`.
+- `npm run build` runs Node/npm and the App compiler on your machine against an
+  isolated snapshot of saved files. It does not allocate a build Computer.
+- The template is React/Caps UI, one typed Agar `greet` method, a Durable Object
+  facet, and a minimal Oyster Worker/config. It declares no Computer or
+  container.
+
+Wrangler configurations that include a container-backed Computer need Docker to
+build and run that Computer locally. That is separate from compiling and running
+this App.
+
+Without an attached Computer, Computer files, shell commands, processes and port
+previews are unavailable. Hosted repository build jobs also need their
+configured execution backend. The starter does not emulate Team sign-in/grants
+or funded provider services, and does not map your laptop's files into a
+Computer. Development admits local requests as its owner; use it for trusted
+source, not as a production authentication or isolation proof.
+
+### Measured startup
+
+In a Linux trial on October 28, 2026, the locally packed candidate took **53.8
+seconds** from starting the scaffold command to the first working browser
+greeting, under the conditions below:
+
+| Step                                   | Elapsed |
+| -------------------------------------- | ------- |
+| Scaffold and install                   | 42.3 s  |
+| Scaffold → first working App greeting  | 53.8 s  |
+| Saved UI/backend edit → changed result | 11.0 s  |
+| Separate `npm run build`               | 10.6 s  |
+
+The cold run used a fresh HOME and empty npm cache on Linux, with Docker blocked
+and no inherited Fungi or Cloudflare credentials. Node/npm/Git were already
+installed. The packed-release proof served Fungi packages from local tarballs
+and downloaded other dependencies from npm. Packing and toolchain/browser
+installation were outside the clock. The saved-edit measurement reused the
+running App. These are observed times, not a two-minute guarantee on another
+machine or network.
+
 ## Examples
 
-To create the App without installing dependencies:
+**Not yet published on npm.** This alternative initializer also describes the
+intended published workflow, not a setup you can run from npm today. To create
+the App without installing dependencies:
 
 ```sh
 npm create fungi-app@latest my-app -- --no-install

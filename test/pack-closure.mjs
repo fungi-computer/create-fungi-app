@@ -1,18 +1,19 @@
 import { URL } from "node:url";
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile, readdir, rm } from "node:fs/promises";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repository = fileURLToPath(new URL("../../../", import.meta.url));
 const destination = join(repository, ".botanical/create-fungi-app/archives");
 const packages = new Map();
-for (const entry of await readdir(join(repository, "packages"), {
-  withFileTypes: true,
-})) {
-  if (!entry.isDirectory()) continue;
-  const directory = join(repository, "packages", entry.name);
-  if (!(await readdir(directory)).includes("package.json")) continue;
+const workspaces = JSON.parse(
+  execFileSync("pnpm", ["list", "--recursive", "--depth=-1", "--json"], {
+    cwd: repository,
+    encoding: "utf8",
+  }),
+);
+for (const { path: directory } of workspaces) {
   const manifest = JSON.parse(
     await readFile(join(directory, "package.json"), "utf8"),
   );

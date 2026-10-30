@@ -18,6 +18,7 @@ import {
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { performance } from "node:perf_hooks";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium, expect } from "playwright/test";
 import * as Effect from "effect/Effect";
@@ -90,10 +91,20 @@ await new Promise((done) => registry.listen(0, "127.0.0.1", done));
 registryOrigin = `http://127.0.0.1:${registry.address().port}`;
 const directory = await mkdtemp(join(tmpdir(), "fungi-app-clean-home-"));
 const home = join(directory, "home");
+const bin = join(directory, "bin");
+const dockerAttempts = join(bin, "docker-attempts");
 await mkdir(home);
+await mkdir(bin);
+// A Docker installation/daemon on the proof host must not make this pass.
+await writeFile(
+  join(bin, "docker"),
+  '#!/bin/sh\nprintf "docker invoked\\n" >> "$(dirname "$0")/docker-attempts"\nexit 127\n',
+  { mode: 0o755 },
+);
 const env = {
-  PATH: process.env.PATH,
+  PATH: `${bin}:${process.env.PATH}`,
   HOME: home,
+  DOCKER_HOST: `unix://${join(home, "missing-docker.sock")}`,
   CI: "true",
   npm_config_yes: "true",
   npm_config_registry: registryOrigin,
@@ -130,22 +141,35 @@ function command(args, cwd, longRunning = false, executable = "npm") {
 }
 let browser;
 try {
-  await command(
-    ["create", "fungi-app@latest", "my-app", "--", "--no-install"],
-    directory,
-  ).stopped;
+  assert.throws(() => execFileSync("docker", ["version"], { env }), {
+    status: 127,
+  });
+  await writeFile(dockerAttempts, "");
+  const started = performance.now();
+  await command(["create", "fungi-app@latest", "my-app"], directory).stopped;
+  const timings = {
+    scaffoldInstallMs: Math.round(performance.now() - started),
+  };
   const appDirectory = join(directory, "my-app");
-  await command(["install", "--no-audit", "--no-fund"], appDirectory).stopped;
-  await command(["exec", "--", "tsc", "-p", "tsconfig.json"], appDirectory)
-    .stopped;
-  await command(["run", "build"], appDirectory).stopped;
-  const release = JSON.parse(
-    await readFile(join(appDirectory, "dist/release.json"), "utf8"),
-  );
   const manifest = JSON.parse(
     await readFile(join(appDirectory, "package.json"), "utf8"),
   );
-  assert.equal(release.appId, manifest.fungi.appId);
+  const config = JSON.parse(
+    await readFile(join(appDirectory, "oyster/wrangler.json"), "utf8"),
+  );
+  assert.equal(config.containers, undefined, "The starter needs no Computer");
+  const checkBuild = async () => {
+    await command(["exec", "--", "tsc", "-p", "tsconfig.json"], appDirectory)
+      .stopped;
+    const buildStarted = performance.now();
+    await command(["run", "build"], appDirectory).stopped;
+    timings.buildMs = Math.round(performance.now() - buildStarted);
+    const release = JSON.parse(
+      await readFile(join(appDirectory, "dist/release.json"), "utf8"),
+    );
+    assert.equal(release.appId, manifest.fungi.appId);
+    assert.ok((await readdir(join(appDirectory, "dist/artifacts"))).length > 0);
+  };
   const origin = "http://127.0.0.1:61347";
   const celld = process.env.CELLD_PLATFORM_CELLD;
   let authorization = {};
@@ -153,12 +177,10 @@ try {
   let dev;
   if (celld) {
     // Exercise the identical standalone root with celld's ordinary dev CLI.
+    await checkBuild();
     const key = randomBytes(24).toString("hex");
     ownerKey = key;
     authorization = { Authorization: `Bearer ${key}` };
-    const config = JSON.parse(
-      await readFile(join(appDirectory, "oyster/wrangler.json"), "utf8"),
-    );
     delete config.$schema;
     await writeFile(
       join(appDirectory, "wrangler.json"),
@@ -236,6 +258,12 @@ if (!response.ok) throw new Error("Release installation refused: " + response.st
   assert.deepEqual(await result.json(), { message: "Hello, Oyster!" });
   browser = await chromium.launch();
   const page = await browser.newPage();
+  const assets = [];
+  page.on("response", (response) => {
+    const url = new URL(response.url());
+    if (url.origin === origin && url.pathname.startsWith("/ui/"))
+      assets.push({ path: url.pathname, status: response.status() });
+  });
   if (ownerKey !== undefined) {
     const signedIn = await page.request.post(`${origin}/login`, {
       form: { key: ownerKey },
@@ -255,6 +283,14 @@ if (!response.ok) throw new Error("Release installation refused: " + response.st
   assert.ok(
     buttonBounds.width < containerBounds.width / 2,
     "Say hello must keep its intrinsic width rather than stretching across the App",
+  );
+  await button.click();
+  await expect(frame.getByRole("status")).toHaveText("Hello, friend!");
+  timings.coldAppMs = Math.round(performance.now() - started);
+  assert.ok(assets.length > 0, "The real App must load its Release assets");
+  assert.ok(
+    assets.every(({ status }) => status === 200),
+    JSON.stringify(assets),
   );
   const methodRoute = "**/apps/app/methods/greet";
   await page.route(methodRoute, (route) =>
@@ -277,6 +313,7 @@ if (!response.ok) throw new Error("Release installation refused: " + response.st
     fullPage: true,
   });
   if (!celld) {
+    const edited = performance.now();
     const ui = join(appDirectory, "src/App.tsx");
     await writeFile(
       ui,
@@ -297,11 +334,24 @@ if (!response.ok) throw new Error("Release installation refused: " + response.st
       await frame.getByRole("button", { name: "Say hello" }).click();
       await expect(frame.getByRole("status")).toHaveText("Welcome, friend!");
     }).toPass({ timeout: 120000 });
+    timings.savedEditMs = Math.round(performance.now() - edited);
+    await checkBuild();
   }
+  assert.equal(
+    await readFile(dockerAttempts, "utf8"),
+    "",
+    "Docker was invoked",
+  );
+  const measurement = { runtime: celld ? "celld" : "wrangler", ...timings };
+  await writeFile(
+    join(proofDirectory, "timings.json"),
+    `${JSON.stringify(measurement, null, 2)}\n`,
+  );
+  console.log("TIMING", JSON.stringify(measurement));
   console.log(
     celld
-      ? "PASS clean HOME packed npm create → npm run build → celld dev: standalone App UI and typed method"
-      : "PASS clean HOME packed npm create → npm run build → wrangler dev: App UI, typed method and saved-edit live reload",
+      ? "PASS Docker unavailable, clean HOME packed npm create → npm run build → celld dev: standalone App UI and typed method"
+      : "PASS Docker unavailable, clean HOME packed npm create → wrangler dev → npm run build: App UI, typed method, assets and saved-edit live reload",
   );
 } finally {
   if (browser) await browser.close();

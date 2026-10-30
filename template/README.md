@@ -10,11 +10,28 @@ npm install
 npm run dev
 ```
 
+No Docker, Fungi Computer, or Cloudflare account is needed. Open the printed
+loopback URL and click **Say hello**, or test the same backend directly:
+
+```sh
+curl --fail-with-body http://127.0.0.1:61343/apps/app/methods/greet \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Oyster"}'
+# {"message":"Hello, Oyster!"}
+```
+
 Development runs a standalone Oyster on loopback with Wrangler. Save an edit in
 `src/` to rebuild the App and reload its page. The development host admits local
 requests as its owner; use the ordinary key-authenticated `oyster/worker.ts` for
 a deployed host, with `OYSTER_OWNER_KEY` as a secret and `OYSTER_ORIGIN` set to
 its public origin. Each App Instance records that origin when it is installed.
+
+The host Worker, Durable Objects, Worker Loader and Release assets run locally;
+state stays under `.wrangler/`. No Computer or container is configured. Computer
+files, shell commands, processes and port previews need an attached Computer.
+Team sign-in/grants and funded provider services are not emulated. See the
+[create-fungi-app quickstart](https://docs.fungi.computer/create-fungi-app/quickstart/)
+for the measured cold-start time and the local/hosted boundary.
 
 `src/backend/methods.ts` declares the method's input and output schemas and its
 handler. `src/backend/index.ts` exports the Durable Object facet. The
