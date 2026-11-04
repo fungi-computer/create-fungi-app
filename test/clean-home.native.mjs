@@ -193,7 +193,6 @@ try {
     );
     env.CELLD_ESBUILD = join(appDirectory, "node_modules/.bin/esbuild");
     env.CELLD_READY_FLEET_GATE_MS = "0";
-    env.CELLD_V8_HEAP_LIMIT_MB = "256";
     dev = command(
       [
         "dev",
