@@ -146,3 +146,46 @@ test("App build uses the recipe in the working package manifest", async () => {
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+for (const { args, message } of [
+  {
+    args: ["My-App", "--no-install"],
+    message:
+      "Choose a directory with a valid npm package name, such as my-app.",
+  },
+  {
+    args: ["one", "two", "--no-install"],
+    message: "Provide one project directory, such as my-app.",
+  },
+  {
+    args: ["--wat"],
+    message: "Unknown option. Run create-fungi-app --help for usage.",
+  },
+  {
+    args: [],
+    message:
+      "Provide a project directory when running without a terminal: npm create fungi-app@latest my-app",
+  },
+]) {
+  test(`invalid initializer input explains how to continue: ${JSON.stringify(args)}`, async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fungi-app-input-"));
+    try {
+      const result = spawnSync(
+        process.execPath,
+        ["--import", import.meta.resolve("tsx"), cli, ...args],
+        {
+          cwd: directory,
+          encoding: "utf8",
+          env: { PATH: process.env.PATH, HOME: directory },
+        },
+      );
+      assert.equal(result.status, 1);
+      const output = result.stdout + result.stderr;
+      assert.ok(output.includes(message), output);
+      assert.ok(!output.includes(directory), output);
+      assert.deepEqual(await readdir(directory), []);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+}
