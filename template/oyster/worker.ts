@@ -3,6 +3,7 @@ import { createOysterWorker } from "@fungi.computer/oyster/workers";
 export {
   OysterBinding,
   OysterInstance,
+  OysterMcp,
   OysterRegistry,
   OysterInstallationExecutor,
 } from "@fungi.computer/oyster/workers";

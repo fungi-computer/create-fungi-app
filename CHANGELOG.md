@@ -1,5 +1,18 @@
 # create-fungi-app
 
+## 0.0.2
+
+### Patch Changes
+
+- Changes since 0.0.1:
+
+  - fix(create-fungi-app): export and bind OysterMcp so a new Oyster serves /mcp
+
+- Updated dependencies
+  - @fungi.computer/oyster@0.15.0
+  - @fungi.computer/lantern@0.4.2
+  - @fungi.computer/puffball@0.5.4
+
 ## 0.0.1
 
 ### Patch Changes

@@ -25,6 +25,8 @@ Development runs a standalone Oyster on loopback with Wrangler. Save an edit in
 requests as its owner; use the ordinary key-authenticated `oyster/worker.ts` for
 a deployed host, with `OYSTER_OWNER_KEY` as a secret and `OYSTER_ORIGIN` set to
 its public origin. Each App Instance records that origin when it is installed.
+The host serves `/mcp` (send `Authorization: Bearer $OYSTER_OWNER_KEY`) only for
+requests whose host matches `OYSTER_ORIGIN`; any other host gets a plain 404.
 
 The host Worker, Durable Objects, Worker Loader and Release assets run locally;
 state stays under `.wrangler/`. No Computer or container is configured. Computer

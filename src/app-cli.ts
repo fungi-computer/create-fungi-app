@@ -101,7 +101,7 @@ async function dev(port: number) {
   const worker = (
     release: string,
   ) => `import worker from "../../oyster/worker.ts";
-export { OysterBinding, OysterRegistry, OysterInstance, OysterInstallationExecutor } from "../../oyster/worker.ts";
+export { OysterBinding, OysterRegistry, OysterInstance, OysterMcp, OysterInstallationExecutor } from "../../oyster/worker.ts";
 export default { async fetch(request, env, context) {
   const headers = new Headers(request.headers);
   headers.set("Authorization", "Bearer " + env.OYSTER_OWNER_KEY);

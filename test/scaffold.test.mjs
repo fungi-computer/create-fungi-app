@@ -189,3 +189,47 @@ for (const { args, message } of [
     }
   });
 }
+
+test("the scaffolded Oyster Worker exports and binds everything createOysterWorker serves", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "create-fungi-app-oyster-"));
+  try {
+    const result = spawnSync(
+      process.execPath,
+      ["--import", import.meta.resolve("tsx"), cli, "my-app", "--no-install"],
+      {
+        cwd: directory,
+        encoding: "utf8",
+        env: { PATH: process.env.PATH, HOME: directory },
+      },
+    );
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    const worker = await readFile(
+      join(directory, "my-app/oyster/worker.ts"),
+      "utf8",
+    );
+    const config = JSON.parse(
+      await readFile(join(directory, "my-app/oyster/wrangler.json"), "utf8"),
+    );
+    const classes = ["OysterRegistry", "OysterInstance", "OysterMcp"];
+    for (const name of [
+      ...classes,
+      "OysterBinding",
+      "OysterInstallationExecutor",
+    ])
+      assert.match(worker, new RegExp(`\\b${name},`), `${name} export`);
+    const bindings = Object.fromEntries(
+      config.durable_objects.bindings.map((b) => [b.name, b.class_name]),
+    );
+    assert.deepEqual(bindings, {
+      MCP: "OysterMcp",
+      REGISTRY: "OysterRegistry",
+      INSTANCES: "OysterInstance",
+    });
+    assert.deepEqual(
+      config.migrations.flatMap((m) => m.new_sqlite_classes).sort(),
+      [...classes].sort(),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

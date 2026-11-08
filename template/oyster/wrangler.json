@@ -18,6 +18,10 @@
   "durable_objects": {
     "bindings": [
       {
+        "name": "MCP",
+        "class_name": "OysterMcp"
+      },
+      {
         "name": "REGISTRY",
         "class_name": "OysterRegistry"
       },
@@ -30,7 +34,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["OysterRegistry", "OysterInstance"]
+      "new_sqlite_classes": ["OysterRegistry", "OysterInstance", "OysterMcp"]
     }
   ]
 }
