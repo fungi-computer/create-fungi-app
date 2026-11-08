@@ -7,11 +7,6 @@ method, running in a local standalone Oyster. Most people want
 
 ## Quick start
 
-> **Not yet published on npm.** This starter has been tested with locally packed
-> candidate packages. `npm create fungi-app@latest` is not available from the
-> public npm registry yet. The commands below describe the intended published
-> workflow, not a setup you can run from npm today.
-
 Build and test an App locally without Docker, a Fungi Computer, or a Cloudflare
 account.
 
@@ -23,9 +18,10 @@ cd my-app
 npm run dev
 ```
 
-Use `-- --no-install` to generate files without installing dependencies. With no
-directory argument, Lantern asks for the project name and whether to install.
-Existing directories are refused.
+Use `-- --no-install` to generate files without installing dependencies. In a
+terminal, running `npm create fungi-app@latest` with no directory asks for the
+project name and whether to install; without a terminal, pass the directory
+argument. Existing directories are refused.
 
 Open the loopback URL printed by the development command. Click **Say hello** to
 call the backend. Save an edit in `src/` to rebuild the App and reload its page.
@@ -94,9 +90,7 @@ machine or network.
 
 ## Examples
 
-**Not yet published on npm.** This alternative initializer also describes the
-intended published workflow, not a setup you can run from npm today. To create
-the App without installing dependencies:
+To create the App without installing dependencies:
 
 ```sh
 npm create fungi-app@latest my-app -- --no-install
