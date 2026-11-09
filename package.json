@@ -1,6 +1,6 @@
 {
   "name": "create-fungi-app",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "Create a Caps and Agar App that runs on a standalone Oyster",
   "type": "module",
   "license": "MIT",
