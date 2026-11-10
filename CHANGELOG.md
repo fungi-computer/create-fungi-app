@@ -1,5 +1,16 @@
 # create-fungi-app
 
+## 0.0.48
+
+### Patch Changes
+
+- Changes since 0.0.47:
+
+  - fix(oyster): run trial Git storage in Wrangler's local simulator
+
+- Updated dependencies
+  - @fungi.computer/oyster@0.20.3
+
 ## 0.0.47
 
 ### Patch Changes
