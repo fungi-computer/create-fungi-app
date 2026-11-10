@@ -1,5 +1,16 @@
 # create-fungi-app
 
+## 0.0.40
+
+### Patch Changes
+
+- Changes since 0.0.39:
+
+  - fix(packages): describe Fungi npm entry points
+
+- Updated dependencies
+  - @fungi.computer/oyster@0.19.30
+
 ## 0.0.39
 
 ### Patch Changes
