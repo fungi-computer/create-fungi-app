@@ -57,9 +57,9 @@ use the ordinary Oyster CLI:
 ```sh
 export OYSTER_URL=https://your-oyster.example
 export OYSTER_OWNER_KEY='<your owner key>'
-npx oyster install ./dist --installation-id my-app
+npx @fungi.computer/oyster install ./dist --installation-id my-app
 # The manifest path is also accepted:
-npx oyster install ./dist/release.json --installation-id my-app
+npx @fungi.computer/oyster install ./dist/release.json --installation-id my-app
 ```
 
 Both forms use `installRelease` from `@fungi.computer/oyster/pack`: artifacts
@@ -77,21 +77,10 @@ any previous Release running. Local-only Computers return `no_backend`.
 The same Release format is used by Fungi. Building creates the Release locally;
 it does not install or publish it.
 
-## Models and mascots
+## Assets
 
-When adding Quaternius art, add `@fungi.computer/art-library` and `three` as
-dependencies. Discover models through `@fungi.computer/art-library/models`: use
-`models` and `searchModels(models, query)` to find candidates, then
-`requireModel(models, id)` to pin a catalog ID rather than guessing filenames.
-
-Load the selected asset with `modelLoader()` from
-`@fungi.computer/art-library/three` and its `loadAsync(modelUrl)` method. This
-loader wires the Meshopt decoder needed by compressed models; a bare
-`GLTFLoader` does not.
-
-Include the chosen model (and any referenced buffers/textures) in the Release's
-built assets and use the emitted asset URL; the catalog row's `file` is not a
-public Oyster URL. Keep `fungi.build.assetBase` as `"./"` and URLs
+Include assets and their referenced files in the Release's built assets and use
+the emitted asset URL. Keep `fungi.build.assetBase` as `"./"` and URLs
 release-scoped under `/ui/<installation>/<release>/`. Resolve emitted relative
 paths against the App document base, for example
 `new URL("./assets/mascot.glb", document.baseURI).href` if that is the emitted
