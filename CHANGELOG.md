@@ -1,5 +1,12 @@
 # create-fungi-app
 
+## 0.0.36
+
+### Patch Changes
+
+- Updated dependencies
+  - @fungi.computer/oyster@0.19.27
+
 ## 0.0.35
 
 ### Patch Changes
