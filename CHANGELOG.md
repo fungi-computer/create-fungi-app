@@ -1,5 +1,13 @@
 # create-fungi-app
 
+## 0.0.37
+
+### Patch Changes
+
+- Changes since 0.0.36:
+
+  - fix(create-fungi-app): align starter types with Wrangler peer requirements
+
 ## 0.0.36
 
 ### Patch Changes
