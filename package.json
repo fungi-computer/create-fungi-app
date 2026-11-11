@@ -1,6 +1,6 @@
 {
   "name": "create-fungi-app",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "description": "Create a TypeScript App with a local Oyster, then build a Release to install on your Oyster.",
   "homepage": "https://docs.fungi.computer/create-fungi-app",
   "keywords": [
