@@ -1,5 +1,14 @@
 # create-fungi-app
 
+## 0.0.75
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @fungi.computer/oyster@0.29.0
+  - @fungi.computer/puffball@0.9.0
+
 ## 0.0.74
 
 ### Patch Changes
