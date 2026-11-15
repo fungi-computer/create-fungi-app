@@ -1,6 +1,6 @@
 {
   "name": "create-fungi-app",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "description": "Create a TypeScript App with a local Oyster, then build a Release to install on your Oyster.",
   "homepage": "https://docs.fungi.computer/create-fungi-app",
   "keywords": [
@@ -35,27 +35,18 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src test scripts --max-warnings=0 && ../../node_modules/.bin/oxlint --config ../../oxlint.config.ts --deny-warnings src test scripts",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/scaffold.test.mjs",
-    "docs": "tsx ../../tooling/repository/src/docs/cli.ts check --root ../..",
-    "docs:write": "tsx ../../tooling/repository/src/docs/cli.ts write --root ../..",
-    "pack": "mkdir -p ../../.botanical/create-fungi-app-pack && pnpm pack --pack-destination ../../.botanical/create-fungi-app-pack",
     "smoke": "node dist/cli.js --help",
-    "stranger": "tsx ../../tooling/repository/src/artifacts/cli.ts --repo-root ../.. .",
-    "format:check": "node ../../tooling/repository/scripts/format-package-check.mjs",
-    "lint:anti-slop": "node ../../tooling/repository/scripts/lint-package-anti-slop.mjs",
-    "proof:clean": "node test/pack-closure.mjs && node test/clean-home.native.mjs ../../.botanical/create-fungi-app/archives",
     "prepack": "node scripts/prepare-package.mjs"
   },
   "dependencies": {
-    "@fungi.computer/lantern": "workspace:*",
+    "@fungi.computer/lantern": "0.4.2",
     "zod": "4.4.3",
-    "@fungi.computer/oyster": "workspace:*",
-    "@fungi.computer/puffball": "workspace:*",
+    "@fungi.computer/oyster": "0.30.0",
+    "@fungi.computer/puffball": "0.9.0",
     "effect": "4.0.2",
     "validate-npm-package-name": "7.0.2",
-    "@fungi.computer/cairn": "workspace:*"
+    "@fungi.computer/cairn": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
