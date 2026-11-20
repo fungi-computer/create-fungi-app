@@ -62,9 +62,11 @@ npx @fungi.computer/oyster install ./dist --installation-id my-app
 npx @fungi.computer/oyster install ./dist/release.json --installation-id my-app
 ```
 
-Both forms use `installRelease` from `@fungi.computer/oyster/pack`: artifacts
-upload before the installation request. A failed upload or installation exits
-nonzero; the command does not provision or deploy an Oyster.
+The command lists the permissions the App asks for and asks you to confirm once;
+add `--yes` to confirm without asking, as a script must. Both forms use
+`installRelease` from `@fungi.computer/oyster/pack`: artifacts upload before the
+installation request. A failed upload or installation exits nonzero; the command
+does not provision or deploy an Oyster.
 
 For repository-driven authoring, commit the App's root `package.json` and its
 `fungi.build` recipe on main, push to a repository in Bonsai, then open its

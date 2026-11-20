@@ -1,5 +1,16 @@
 # create-fungi-app
 
+## 0.0.118
+
+### Patch Changes
+
+- Changes since 0.0.117:
+
+  - fix(oyster): move install callers to the confirmation and cover updates
+
+- Updated dependencies
+  - @fungi.computer/oyster@0.48.0
+
 ## 0.0.117
 
 ### Patch Changes
