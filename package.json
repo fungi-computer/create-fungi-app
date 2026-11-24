@@ -1,6 +1,6 @@
 {
   "name": "create-fungi-app",
-  "version": "0.0.164",
+  "version": "0.0.165",
   "description": "Create a TypeScript App with a local Oyster, then build a Release to install on your Oyster.",
   "homepage": "https://docs.fungi.computer/create-fungi-app",
   "keywords": [
@@ -42,11 +42,11 @@
   "dependencies": {
     "@fungi.computer/lantern": "0.4.2",
     "zod": "4.4.3",
-    "@fungi.computer/oyster": "0.58.9",
-    "@fungi.computer/puffball": "0.15.1",
+    "@fungi.computer/oyster": "0.58.10",
+    "@fungi.computer/puffball": "0.15.2",
     "effect": "4.0.2",
     "validate-npm-package-name": "7.0.2",
-    "@fungi.computer/cairn": "0.1.0"
+    "@fungi.computer/cairn": "0.1.1"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
